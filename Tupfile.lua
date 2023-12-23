@@ -32,6 +32,12 @@ function Game:variant_fn(variant, basename)
 	return self:fn(string.format("%s/%s", variant, basename))
 end
 
+---@param fn string
+---@return string
+function Game:readme_section_fn(fn)
+	return string.format("%s/README %s.md", self.id, fn)
+end
+
 ---Generates a README file for the given variant.
 ---@param variant string
 ---@param sections string[]
@@ -90,11 +96,15 @@ SH01_REC = { "Romantique Tp recordings", "Sound Canvas VA" }
 for _, rec in pairs(SH01_REC) do
 	local variant_ost = string.format("%s (%s)", SH01_ST[1], rec)
 	local variant_ast = string.format("%s (%s)", SH01_ST[2], rec)
+	local section_ost = sh01:readme_section_fn(SH01_ST[1])
+	local section_ast = sh01:readme_section_fn(SH01_ST[2])
 
 	-- Original soundtrack
-	sh01:lossy(variant_ost, {})
+	local sections = { section_ost }
+	sh01:lossy(variant_ost, sections)
 
 	-- Arranged soundtrack
-	sh01:lossy(variant_ast, {})
+	local sections = { section_ast }
+	sh01:lossy(variant_ast, sections)
 end
 -- ---------------------------
