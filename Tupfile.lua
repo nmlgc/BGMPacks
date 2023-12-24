@@ -109,7 +109,7 @@ local sh01 = Game:new("sh01", "秋霜玉 / Shuusou Gyoku")
 SH01_ST = { "Original soundtrack", "Arranged soundtrack" }
 SH01_REC = { "Romantique Tp recordings", "Sound Canvas VA" }
 
-for _, rec in pairs(SH01_REC) do
+for rec_i, rec in pairs(SH01_REC) do
 	local variant_ost = string.format("%s (%s)", SH01_ST[1], rec)
 	local variant_ast = string.format("%s (%s)", SH01_ST[2], rec)
 	local variant_ost_flac = VariantFLAC(variant_ost)
@@ -118,6 +118,9 @@ for _, rec in pairs(SH01_REC) do
 	local section_ast = sh01:readme_section_fn(SH01_ST[2])
 
 	local sections_rec = { sh01:readme_section_fn(rec) }
+	if rec_i == 2 then
+		sections_rec += { "README Sound Canvas VA process.md" }
+	end
 
 	-- Original soundtrack
 	local sections = { section_ost }
