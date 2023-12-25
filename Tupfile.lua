@@ -25,6 +25,12 @@ function Game:fn(fn)
 	return string.format("%s/%s", self.id, fn)
 end
 
+---@param fn string
+---@return string
+function Game:build_fn(fn)
+	return self:fn("_build/" .. fn)
+end
+
 ---@param variant string
 ---@param basename string
 ---@return string
@@ -108,6 +114,14 @@ end
 local sh01 = Game:new("sh01", "秋霜玉 / Shuusou Gyoku")
 SH01_ST = { "Original soundtrack", "Arranged soundtrack" }
 SH01_REC = { "Romantique Tp recordings", "Sound Canvas VA" }
+
+for i = 1, 19 do
+	local lzh_basename = string.format("ssg_%02u.lzh", i)
+	local cmd = string.format(
+		"curl -o %%o https://www16.big.or.jp/~zun/data/smf/arc/%s", lzh_basename
+	)
+	local lzh = tup.rule({}, cmd, sh01:build_fn(lzh_basename))
+end
 
 for rec_i, rec in pairs(SH01_REC) do
 	local variant_ost = string.format("%s (%s)", SH01_ST[1], rec)
