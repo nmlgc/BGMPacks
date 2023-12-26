@@ -117,8 +117,11 @@ for _, rec in pairs(SH01_REC) do
 	local section_ost = sh01:readme_section_fn(SH01_ST[1])
 	local section_ast = sh01:readme_section_fn(SH01_ST[2])
 
+	local sections_rec = { sh01:readme_section_fn(rec) }
+
 	-- Original soundtrack
 	local sections = { section_ost }
+	sections += sections_rec
 	sh01:lossy(variant_ost, sections)
 
 	-- Arranged soundtrack
@@ -127,6 +130,7 @@ for _, rec in pairs(SH01_REC) do
 		sh01:link(src, variant_ast_flac)
 	end
 	local sections = { section_ast }
+	sections += sections_rec
 	sh01:lossy(variant_ast, sections)
 end
 -- ---------------------------
