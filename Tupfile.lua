@@ -15,6 +15,7 @@ end
 ---@class Game
 ---@field id string
 ---@field title string
+---@field placefiles string[]
 local Game = {}
 
 Game.__index = Game
@@ -88,7 +89,11 @@ function Game:pack(variant, order_inputs)
 	local cmd = string.format(
 		'7z a -xr!.gitignore "%%o" "./%s/%s"', self.id, variant
 	)
+	for _, fn in pairs(self.placefiles) do
+		cmd = (cmd .. string.format(' "./%s"', fn))
+	end
 	inputs += order_inputs
+	inputs += self.placefiles
 	local zip_fn = string.format("release/%s %s.zip", self.id, variant)
 	tup.rule(inputs, cmd, zip_fn)
 end
@@ -125,18 +130,31 @@ end
 
 ---@param id string
 ---@param title string
+---@param place_strings string[]
 ---@return Game
-function Game:new(id, title)
+function Game:new(id, title, place_strings)
 	local ret = setmetatable({
-		id = id, title = (id:upper() .. " " .. title),
+		id = id, title = (id:upper() .. " " .. title), placefiles = {}
 	}, self)
+	for _, str in pairs(place_strings) do
+		ret.placefiles += tup.rule({}, 'type NUL >"%o"', ret:build_fn(str))
+	end
 	return ret
 end
 
 -- SH01 秋霜玉 / Shuusou Gyoku
 -- ---------------------------
 
-local sh01 = Game:new("sh01", "秋霜玉 / Shuusou Gyoku")
+local sh01 = Game:new("sh01", "秋霜玉 / Shuusou Gyoku", {
+	"Place the soundtrack folder into Shuusou Gyoku's bgm folder",
+	"Lege den Soundtrack-Ordner in den bgm-Ordner von Shuusou Gyoku",
+
+	-- Commissioned from https://twitter.com/Wafflesespeon24
+	"「秋霜玉のbgmのフォルダ」では中に置きます「音楽のフォルダ」",
+
+	-- https://twitter.com/verinnah/status/1740070244306043292
+	"Coloca la carpeta de la banda sonora en la carpeta bgm de Shuusou Gyoku",
+})
 SH01_ST = { "Original soundtrack", "Arranged soundtrack" }
 SH01_REC = { "Romantique Tp recordings", "Sound Canvas VA" }
 
