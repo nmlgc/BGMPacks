@@ -84,7 +84,8 @@ end
 
 ---@param variant string
 ---@param readme_sections string[]
-function Game:lossy(variant, readme_sections)
+---@param extra_files_to_link string[]
+function Game:lossy(variant, readme_sections, extra_files_to_link)
 	local variant_flac = VariantFLAC(variant)
 	local variant_lossy = VariantLossy(variant)
 	local f_flac = self:variant_fn(variant_flac, "*.flac")
@@ -96,6 +97,11 @@ function Game:lossy(variant, readme_sections)
 	f_flac += self:readme(variant_flac, readme_sections)
 	readme_sections += { "README Lossy.md" }
 	f_lossy += self:readme(variant_lossy, readme_sections)
+
+	for _, input in pairs(extra_files_to_link) do
+		f_flac += input
+		f_lossy += self:link(input, variant_lossy)
+	end
 end
 
 ---@param id string
@@ -156,15 +162,23 @@ for rec_i, rec in pairs(SH01_REC) do
 	-- Original soundtrack
 	local sections = { section_ost }
 	sections += sections_rec
-	sh01:lossy(variant_ost, sections)
+	sh01:lossy(variant_ost, sections, {})
 
 	-- Arranged soundtrack
+	local flac_extras = {}
+	for _, mid in pairs(arranged_mids_in_pack) do
+		flac_extras += sh01:link(mid, variant_ast_flac)
+	end
 	for _, basename in pairs({ "20.flac", "20.loop.flac" }) do
 		local src = sh01:variant_fn(variant_ost_flac, basename)
 		sh01:link(src, variant_ast_flac)
 	end
 	local sections = { section_ast }
 	sections += sections_rec
-	sh01:lossy(variant_ast, sections)
+	if rec_i == 1 then
+		sections += { sh01:readme_section_fn(variant_ast) }
+	end
+	sections += { section_midi }
+	sh01:lossy(variant_ast, sections, flac_extras)
 end
 -- ---------------------------
