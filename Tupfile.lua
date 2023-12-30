@@ -38,6 +38,22 @@ function Game:readme_section_fn(fn)
 	return string.format("%s/README %s.md", self.id, fn)
 end
 
+--Symlinks `src` into `dst_variant`, using the same basename.
+---@param src string
+---@param dst_variant string
+function Game:link(src, dst_variant)
+	local dst = self:variant_fn(dst_variant, src:gsub(".+/", ""))
+	local cmd
+	if tup.getconfig("TUP_PLATFORM") == "win32" then
+		local src_win = src:gsub("/", "\\"):gmatch("%w+\\(.+)")()
+		local dst_win = dst:gsub("/", "\\")
+		cmd = string.format('cmd /c mklink "%s" "..\\%s"', dst_win, src_win)
+	else
+		cmd = 'ln -s "%f" "%o"'
+	end
+	return tup.rule(src, cmd, dst)
+end
+
 ---Generates a README file for the given variant.
 ---@param variant string
 ---@param sections string[]
@@ -96,6 +112,8 @@ SH01_REC = { "Romantique Tp recordings", "Sound Canvas VA" }
 for _, rec in pairs(SH01_REC) do
 	local variant_ost = string.format("%s (%s)", SH01_ST[1], rec)
 	local variant_ast = string.format("%s (%s)", SH01_ST[2], rec)
+	local variant_ost_flac = VariantFLAC(variant_ost)
+	local variant_ast_flac = VariantFLAC(variant_ast)
 	local section_ost = sh01:readme_section_fn(SH01_ST[1])
 	local section_ast = sh01:readme_section_fn(SH01_ST[2])
 
@@ -104,6 +122,10 @@ for _, rec in pairs(SH01_REC) do
 	sh01:lossy(variant_ost, sections)
 
 	-- Arranged soundtrack
+	for _, basename in pairs({ "20.flac", "20.loop.flac" }) do
+		local src = sh01:variant_fn(variant_ost_flac, basename)
+		sh01:link(src, variant_ast_flac)
+	end
 	local sections = { section_ast }
 	sh01:lossy(variant_ast, sections)
 end
