@@ -83,9 +83,23 @@ function Game:readme(variant, sections)
 end
 
 ---@param variant string
+---@param order_inputs string[]
+function Game:pack(variant, order_inputs)
+	local cmd = string.format(
+		'7z a -xr!.gitignore "%%o" "./%s/%s"', self.id, variant
+	)
+	inputs += order_inputs
+	local zip_fn = string.format("release/%s %s.zip", self.id, variant)
+	tup.rule(inputs, cmd, zip_fn)
+end
+
+---@param variant string
 ---@param readme_sections string[]
 ---@param extra_files_to_link string[]
-function Game:lossy(variant, readme_sections, extra_files_to_link)
+---@param flac_order_inputs string[]
+function Game:lossy_and_pack(
+	variant, readme_sections, extra_files_to_link, flac_order_inputs
+)
 	local variant_flac = VariantFLAC(variant)
 	local variant_lossy = VariantLossy(variant)
 	local f_flac = self:variant_fn(variant_flac, "*.flac")
@@ -102,6 +116,11 @@ function Game:lossy(variant, readme_sections, extra_files_to_link)
 		f_flac += input
 		f_lossy += self:link(input, variant_lossy)
 	end
+
+	f_flac += flac_order_inputs
+	f_lossy += flac_order_inputs
+	self:pack(variant_flac, f_flac)
+	self:pack(variant_lossy, f_lossy)
 end
 
 ---@param id string
@@ -142,9 +161,11 @@ for i = 1, 19 do
 	)
 end
 local section_midi = sh01:readme_section_fn("MIDI")
-sh01:readme(variant_mid, {
+local inputs = sh01:readme(variant_mid, {
 	sh01:readme_section_fn(variant_mid), section_midi
 })
+inputs += arranged_mids_in_pack
+sh01:pack(variant_mid, inputs)
 
 for rec_i, rec in pairs(SH01_REC) do
 	local variant_ost = string.format("%s (%s)", SH01_ST[1], rec)
@@ -162,16 +183,17 @@ for rec_i, rec in pairs(SH01_REC) do
 	-- Original soundtrack
 	local sections = { section_ost }
 	sections += sections_rec
-	sh01:lossy(variant_ost, sections, {})
+	sh01:lossy_and_pack(variant_ost, sections, {}, {})
 
 	-- Arranged soundtrack
 	local flac_extras = {}
 	for _, mid in pairs(arranged_mids_in_pack) do
 		flac_extras += sh01:link(mid, variant_ast_flac)
 	end
+	local order_inputs = {}
 	for _, basename in pairs({ "20.flac", "20.loop.flac" }) do
 		local src = sh01:variant_fn(variant_ost_flac, basename)
-		sh01:link(src, variant_ast_flac)
+		order_inputs += sh01:link(src, variant_ast_flac)
 	end
 	local sections = { section_ast }
 	sections += sections_rec
@@ -179,6 +201,6 @@ for rec_i, rec in pairs(SH01_REC) do
 		sections += { sh01:readme_section_fn(variant_ast) }
 	end
 	sections += { section_midi }
-	sh01:lossy(variant_ast, sections, flac_extras)
+	sh01:lossy_and_pack(variant_ast, sections, flac_extras, order_inputs)
 end
 -- ---------------------------
