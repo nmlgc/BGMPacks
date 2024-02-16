@@ -115,7 +115,9 @@ local sh01 = Game:new("sh01", "秋霜玉 / Shuusou Gyoku")
 SH01_ST = { "Original soundtrack", "Arranged soundtrack" }
 SH01_REC = { "Romantique Tp recordings", "Sound Canvas VA" }
 
+local variant_mid = string.format("%s (MIDIs only)", SH01_ST[2])
 local build_path = sh01:build_fn("")
+local arranged_mids_in_pack = {}
 for i = 1, 19 do
 	local lzh_basename = string.format("ssg_%02u.lzh", i)
 	local cmd = string.format(
@@ -127,7 +129,16 @@ for i = 1, 19 do
 	local mid_fn_original = (build_path .. mid_fn_in_lzh)
 	cmd = string.format('7z e -o"%s" %%f %s', build_path, mid_fn_in_lzh)
 	tup.rule(lzh, cmd, mid_fn_original)
+	arranged_mids_in_pack += tup.rule(
+		mid_fn_original,
+		"midicomp -i %f | sed -rf 'sh01/MIDI fixes.sed' | midicomp -ic \"%o\"",
+		sh01:fn(string.format("%s/%02u.mid", variant_mid, i))
+	)
 end
+local section_midi = sh01:readme_section_fn("MIDI")
+sh01:readme(variant_mid, {
+	sh01:readme_section_fn(variant_mid), section_midi
+})
 
 for rec_i, rec in pairs(SH01_REC) do
 	local variant_ost = string.format("%s (%s)", SH01_ST[1], rec)

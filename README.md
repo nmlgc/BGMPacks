@@ -5,6 +5,7 @@
 The Tupfile depends on the following tools:
 
 * [`7z`](https://7-zip.org/)
+* [`midicomp`](https://github.com/markc/midicomp)
 * [`oggenc`](https://rarewares.org/ogg-oggenc.php)
 * `cat`
 * `curl`
