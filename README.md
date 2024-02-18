@@ -5,4 +5,4 @@
 The Tupfile depends on the following tools:
 
 * [`oggenc`](https://rarewares.org/ogg-oggenc.php)
-* [`7z`](https://7-zip.org/)
+* `cat`
