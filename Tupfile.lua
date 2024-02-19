@@ -44,6 +44,9 @@ function Game:readme(variant, sections)
 	for _, section in pairs(sections) do
 		cmd = (cmd .. string.format('&& cat "%s"', section))
 	end
+	cmd = (cmd .. string.format(
+		" | sed -f README.sed -e s/\\{oggenc_q\\}/%d/", OGGENC_Q
+	))
 	return tup.rule(
 		sections,
 		string.format('(%s)>"%%o"', cmd),
@@ -63,7 +66,8 @@ function Game:lossy(variant, readme_sections)
 		self:variant_fn(variant_lossy, "%B.ogg")
 	)
 	f_flac += self:readme(variant_flac, readme_sections)
-	self:readme(variant_lossy, readme_sections)
+	readme_sections += { "README Lossy.md" }
+	f_lossy += self:readme(variant_lossy, readme_sections)
 end
 
 ---@param id string

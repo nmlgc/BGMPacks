@@ -6,3 +6,4 @@ The Tupfile depends on the following tools:
 
 * [`oggenc`](https://rarewares.org/ogg-oggenc.php)
 * `cat`
+* `sed`
