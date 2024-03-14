@@ -193,9 +193,13 @@ for rec_i, rec in pairs(SH01_REC) do
 	local section_ost = sh01:readme_section_fn(SH01_ST[1])
 	local section_ast = sh01:readme_section_fn(SH01_ST[2])
 
-	local sections_rec = { sh01:readme_section_fn(rec) }
-	if rec_i == 2 then
+	local sections_rec = {}
+	if rec_i >= 2 then
+		sections_rec += { "README Sound Canvas VA.md" }
+		sections_rec += { sh01:readme_section_fn(rec) }
 		sections_rec += { "README Sound Canvas VA process.md" }
+	else
+		sections_rec += { sh01:readme_section_fn(rec) }
 	end
 
 	-- Original soundtrack
