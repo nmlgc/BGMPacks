@@ -156,7 +156,7 @@ local sh01 = Game:new("sh01", "秋霜玉 / Shuusou Gyoku", {
 	"Coloca la carpeta de la banda sonora en la carpeta bgm de Shuusou Gyoku",
 })
 SH01_ST = { "Original soundtrack", "Arranged soundtrack" }
-SH01_REC = { "Romantique Tp recordings", "Sound Canvas VA" }
+SH01_REC = { "(Romantique Tp recordings)", "(Sound Canvas VA) (no echo)" }
 
 local variant_mid = string.format("%s (MIDIs only)", SH01_ST[2])
 local build_path = sh01:build_fn("")
@@ -186,8 +186,8 @@ inputs += arranged_mids_in_pack
 sh01:pack(variant_mid, inputs)
 
 for rec_i, rec in pairs(SH01_REC) do
-	local variant_ost = string.format("%s (%s)", SH01_ST[1], rec)
-	local variant_ast = string.format("%s (%s)", SH01_ST[2], rec)
+	local variant_ost = string.format("%s %s", SH01_ST[1], rec)
+	local variant_ast = string.format("%s %s", SH01_ST[2], rec)
 	local variant_ost_flac = VariantFLAC(variant_ost)
 	local variant_ast_flac = VariantFLAC(variant_ast)
 	local section_ost = sh01:readme_section_fn(SH01_ST[1])
@@ -196,6 +196,9 @@ for rec_i, rec in pairs(SH01_REC) do
 	local sections_rec = {}
 	if rec_i >= 2 then
 		sections_rec += { "README Sound Canvas VA.md" }
+		sections_rec += {
+			sh01:readme_section_fn("Sound Canvas VA echo header")
+		}
 		sections_rec += { sh01:readme_section_fn(rec) }
 		sections_rec += { "README Sound Canvas VA process.md" }
 	else

@@ -7,4 +7,4 @@ This BGM pack was created by running the MIDI files through [Sound Canvas VA](ht
 * With no vintage synthesizer DAC or audio cables involved, the rendered output is free of recording noise and distortion.
 * Loops can be perfectly continuous and inherently free of glitches, as they can be constructed by separately rendering the intro and loop parts and then splicing the two together at exact sample positions, instead of cutting them by ear in a trial-and-error process.
 
-In exchange, the resulting sound is noticeably cleaner and drier compared to real hardware, which you may or may not prefer.\
+In exchange, the resulting sound is noticeably cleaner compared to real hardware, which you may or may not prefer.

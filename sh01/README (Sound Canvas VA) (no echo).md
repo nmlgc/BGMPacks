@@ -1,0 +1,1 @@
+This *no-echo* pack doesn't attempt to work around the issue, and therefore retains Sound Canvas VA's default reverb for the affected tracks. This results in a noticeably drier overall sound when compared to the Romantique Tp recordings.
