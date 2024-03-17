@@ -1,0 +1,2 @@
+
+The current version of this BGM pack doesn't include ZUN's comments from the .TXT files in the .LZH archives, as Shuusou Gyoku's BGM pack implementation did not support custom Music Room comments at the time of this release. This feature is tracked in [Shuusou Gyoku issue #56](https://github.com/nmlgc/ssg/issues/56), and can be commissioned through the [ReC98 storefront](https://rec98.nmlgc.net).

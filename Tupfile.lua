@@ -158,9 +158,22 @@ local sh01 = Game:new("sh01", "秋霜玉 / Shuusou Gyoku", {
 SH01_ST = { "Original soundtrack", "Arranged soundtrack" }
 SH01_REC = { "(Romantique Tp recordings)", "(Sound Canvas VA) (no echo)" }
 
+---@param echo boolean
+---@return string[]
+function sh01:sections_midi(echo)
+	local ret = { self:readme_section_fn("MIDI") }
+	if echo then
+		ret += self:readme_section_fn("MIDI echo")
+	end
+	ret += self:readme_section_fn("MIDI footer")
+	return ret
+end
+
 local variant_mid = string.format("%s (MIDIs only)", SH01_ST[2])
+local variant_mid_ne = string.format("%s (no echo)", variant_mid)
+local variant_mid_e = string.format("%s (echo)", variant_mid)
 local build_path = sh01:build_fn("")
-local arranged_mids_in_pack = {}
+local arranged_mids_in_ne_pack = {}
 for i = 1, 19 do
 	local lzh_basename = string.format("ssg_%02u.lzh", i)
 	local cmd = string.format(
@@ -172,18 +185,28 @@ for i = 1, 19 do
 	local mid_fn_original = (build_path .. mid_fn_in_lzh)
 	cmd = string.format('7z e -o"%s" %%f %s', build_path, mid_fn_in_lzh)
 	tup.rule(lzh, cmd, mid_fn_original)
-	arranged_mids_in_pack += tup.rule(
+	arranged_mids_in_ne_pack += tup.rule(
 		mid_fn_original,
 		"midicomp -i %f | sed -rf 'sh01/MIDI fixes.sed' | midicomp -ic \"%o\"",
-		sh01:fn(string.format("%s/%02u.mid", variant_mid, i))
+		sh01:fn(string.format("%s/%02u.mid", variant_mid_ne, i))
 	)
 end
-local section_midi = sh01:readme_section_fn("MIDI")
-local inputs = sh01:readme(variant_mid, {
-	sh01:readme_section_fn(variant_mid), section_midi
-})
-inputs += arranged_mids_in_pack
-sh01:pack(variant_mid, inputs)
+local sections_midi_ne = { sh01:readme_section_fn(variant_mid) }
+local sections_midi_e = { table.unpack(sections_midi_ne) }
+sections_midi_ne += sh01:sections_midi(false)
+sections_midi_e += sh01:sections_midi(true)
+local inputs = sh01:readme(variant_mid_ne, sections_midi_ne)
+inputs += arranged_mids_in_ne_pack
+sh01:pack(variant_mid_ne, inputs)
+
+local arranged_mids_in_e_pack = tup.foreach_rule(
+	arranged_mids_in_ne_pack,
+	"midicomp -i \"%f\" | sed -rf 'sh01/MIDI echo.sed' | midicomp -ic \"%o\"",
+	sh01:fn(string.format("%s/%%b", variant_mid_e))
+)
+inputs = sh01:readme(variant_mid_e, sections_midi_e)
+inputs += arranged_mids_in_e_pack
+sh01:pack(variant_mid_e, inputs)
 
 for rec_i, rec in pairs(SH01_REC) do
 	local variant_ost = string.format("%s %s", SH01_ST[1], rec)
@@ -212,7 +235,7 @@ for rec_i, rec in pairs(SH01_REC) do
 
 	-- Arranged soundtrack
 	local flac_extras = {}
-	for _, mid in pairs(arranged_mids_in_pack) do
+	for _, mid in pairs(arranged_mids_in_ne_pack) do
 		flac_extras += sh01:link(mid, variant_ast_flac)
 	end
 	local order_inputs = {}
@@ -225,7 +248,7 @@ for rec_i, rec in pairs(SH01_REC) do
 	if rec_i == 1 then
 		sections += { sh01:readme_section_fn(variant_ast) }
 	end
-	sections += { section_midi }
+	sections += sh01:sections_midi(false)
 	sh01:lossy_and_pack(variant_ast, sections, flac_extras, order_inputs)
 end
 -- ---------------------------
