@@ -146,14 +146,14 @@ end
 -- ---------------------------
 
 local sh01 = Game:new("sh01", "秋霜玉 / Shuusou Gyoku", {
-	"Place the soundtrack folder into Shuusou Gyoku's bgm folder",
-	"Lege den Soundtrack-Ordner in den bgm-Ordner von Shuusou Gyoku",
+	"Place the soundtrack folder (not its contents) into Shuusou Gyoku's bgm folder",
+	"Lege den Soundtrack-Ordner (not its contents) in den bgm-Ordner von Shuusou Gyoku",
 
 	-- Commissioned from https://twitter.com/Wafflesespeon24
 	"「秋霜玉のbgmのフォルダ」では中に置きます「音楽のフォルダ」",
 
-	-- https://twitter.com/verinnah/status/1740070244306043292
-	"Coloca la carpeta de la banda sonora en la carpeta bgm de Shuusou Gyoku",
+	-- Based on https://twitter.com/verinnah/status/1740070244306043292
+	"Coloca la carpeta de la banda sonora (no su contenido) en la carpeta bgm de Shuusou Gyoku",
 })
 SH01_ST = { "Original soundtrack", "Arranged soundtrack" }
 SH01_REC = { "(Romantique Tp recordings)", "(Sound Canvas VA) (no echo)" }
