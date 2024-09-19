@@ -9,7 +9,7 @@
 3. In Sound Canvas VA's VST Editor, enable SC-88Pro mode by setting *Option → SYSTEM → Map Mode* to *SC-88Pro*.\
    Leave all other settings at their defaults, including the volume.
 
-4. Set foobar2000's conversion feature to output 32-bit float .WAVs. This preserves any waveform content above 0&nbsp;dBFS, which would otherwise be permanently clipped for any FLAC conversion, and allows the volume to be tuned independently of the rendering.
+4. Set foobar2000's conversion feature to output 32-bit float .WAVs. This preserves any waveform content above 0 dBFS, which would otherwise be permanently clipped for any FLAC conversion, and allows the volume to be tuned independently of the rendering.
 
 #### Per-file loop construction steps
 
@@ -20,21 +20,29 @@
    <file.mid mly filter-note -v (loop start) (loop end) >file_loop.mid
    ```
 
-2. Render all MIDI files through foobar2000's converter.
+2. Render all MIDI files through foobar2000's converter.\
+   While the conversion adds a low three-digit number of additional samples to the beginning of each track, this number should be identical between a track's intro and loop part. Mixing them on top of each other should be enough to seamlessly connect them.
 
-3. Trim leading and trailing silence from all resulting .WAV files. I used GoldWave's feature here, with a threshold of -77.00&nbsp;dB. Both the intro and loop files now end immediately after the release/reverb trail of their last notes has faded out to silence.
+3. Trim trailing silence from all resulting .WAV files, leaving leading silence in place for now. I used GoldWave's feature here, with a threshold of -77.00 dB. Both the intro and loop files now end immediately after the release/reverb trail of their last notes has faded out to silence.
 
-4. Inside `file_intro.wav`:
+4. Note down the following sample counts based on the `mly loop-find` output for the original file:
 
-   1. Take the `First note` sample position reported by `mly loop-find` and add that many samples of leading silence to synchronize it with both the source MIDI and the sample numbers reported by mly.
+   * 𝐅: `First note`
+   * 𝐒: `Loop start`
+   * 𝐄: `Loop end`
+   * 𝐎₁: First sample in `file_intro.wav` with an absolute value of `(4.0 / 32768.0)`
+   * 𝐎₂: First sample in `file_loop.wav` with an absolute value of `(4.0 / 32768.0)`
+   * 𝐓: Number of samples of `file_loop.wav` minus 𝐄 (length of reverb trail)
 
-   2. Mix in all of `file_loop.wav` at the `Loop start` sample (𝐒).
+5. Zero all samples before 𝐎₁ and 𝐎₂ in the respective files to remove any minimal noise from the mixing process.
 
-   3. 𝐃 = Number of samples between the `Loop end` sample (𝐄) and the end of the file.
+6. (𝐎₁ - 𝐅) reveals the additional sample offset added by Sound Canvas VA. Remove that many samples from the beginning of both files.
 
-   4. Mix in the first 𝐃 samples of `file_loop.wav` at 𝐄.
+7. Inside `file_loop.wav`:
 
-   5. The final loop start point is at (𝐒 + 𝐃), forming a continuous waveform with the end of the file.
+   1. Copy 𝐓 samples starting at 𝐎₂ and mix them in at 𝐄.
+   2. Mix in `file_intro.wav` at the first sample.
+   3. The final loop start point is at (𝐒 + 𝐓), forming a continuous waveform with the end of the file.
 
 #### Non-looping files
 
