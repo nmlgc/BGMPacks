@@ -1,2 +1,1 @@
-"*(no echo)*/*.flac" filter=lfs diff=lfs merge=lfs -text
 "*(Romantique Tp recordings)*/*.flac" filter=lfs diff=lfs merge=lfs -text
