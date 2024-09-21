@@ -59,7 +59,7 @@ Bringing down the volume level of the rendered tracks below 0 dbFS now presents
 
 Thanks to the `GAIN FACTOR` tag, we can just go for 1) and then provide 2) via that tag on the same file.
 
-1. Perform a ReplayGain scan in *album* mode across an entire soundtrack, and write the results to the .WAV files.
+1. Perform a ReplayGain scan in *album* mode across an entire soundtrack, and write the results to the .WAV files. If any variants of the soundtrack (such as Shuusou Gyoku's no-echo and echo variants) should be phase-cancelable against each other, they all have to be part of the same scan.
 
    In foobar2000: Context menu *→ ReplayGain → Scan as a single album → Update file tags*
 
