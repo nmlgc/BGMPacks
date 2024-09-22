@@ -169,7 +169,9 @@ local sh01 = Game:new("sh01", "秋霜玉 / Shuusou Gyoku", {
 	"Coloca la carpeta de la banda sonora (no su contenido) en la carpeta bgm de Shuusou Gyoku",
 })
 SH01_ST = { "Original soundtrack", "Arranged soundtrack" }
-SH01_REC = { "(Romantique Tp recordings)", "(Sound Canvas VA) (no echo)" }
+SH01_REC = {
+	"(Romantique Tp recordings)", "(Sound Canvas VA) (echo)", "(Sound Canvas VA) (no echo)",
+}
 
 ---@param echo boolean
 ---@return string[]
@@ -231,6 +233,25 @@ inputs = sh01:readme(variant_mid_e, sections_midi_e)
 inputs += arranged_mids_in_e_pack
 sh01:pack(variant_mid_e, inputs)
 
+--- Link missing echo files from the no-echo recordings
+---@param st string
+local function link_missing(st)
+	local variant_ne = VariantFLAC(st .. " " .. SH01_REC[3])
+	local variant_e = VariantFLAC(st .. " " .. SH01_REC[2])
+	local ne = {}
+	for _, v in pairs(tup.glob(sh01:variant_fn(variant_ne, "*.flac"))) do
+		ne[tup.file(v)] = true
+	end
+	for _, v in pairs(tup.glob(sh01:variant_fn(variant_e, "*.flac"))) do
+		ne[tup.file(v)] = nil
+	end
+	for basename, _ in pairs(ne) do
+		sh01:link(sh01:variant_fn(variant_ne, basename), variant_e)
+	end
+end
+link_missing(SH01_ST[1])
+link_missing(SH01_ST[2])
+
 for rec_i, rec in pairs(SH01_REC) do
 	local variant_ost = string.format("%s %s", SH01_ST[1], rec)
 	local variant_ast = string.format("%s %s", SH01_ST[2], rec)
@@ -259,7 +280,10 @@ for rec_i, rec in pairs(SH01_REC) do
 
 	-- Arranged soundtrack
 	local flac_extras = {}
-	for _, mid in pairs(arranged_mids_in_ne_pack) do
+	local arranged_mids = (
+		((rec_i == 3) and arranged_mids_in_e_pack) or arranged_mids_in_ne_pack
+	)
+	for _, mid in pairs(arranged_mids) do
 		flac_extras += sh01:link(mid, variant_ast_flac)
 	end
 	local order_inputs = {}
