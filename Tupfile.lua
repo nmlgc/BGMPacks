@@ -169,9 +169,7 @@ local sh01 = Game:new("sh01", "秋霜玉 / Shuusou Gyoku", {
 	"Coloca la carpeta de la banda sonora (no su contenido) en la carpeta bgm de Shuusou Gyoku",
 })
 SH01_ST = { "Original soundtrack", "Arranged soundtrack" }
-SH01_REC = {
-	"(Romantique Tp recordings)", "(Sound Canvas VA) (echo)", "(Sound Canvas VA) (no echo)",
-}
+SH01_REC = { "(Romantique Tp recordings)", "(Sound Canvas VA)", "(Sound Canvas VA) (no echo)" }
 
 ---@param echo boolean
 ---@return string[]
@@ -186,7 +184,6 @@ end
 
 local variant_mid = string.format("%s (MIDIs only)", SH01_ST[2])
 local variant_mid_ne = string.format("%s (no echo)", variant_mid)
-local variant_mid_e = string.format("%s (echo)", variant_mid)
 local build_path = sh01:build_fn("")
 local arranged_mids_in_ne_pack = {}
 local arranged_mids_in_e_pack = {}
@@ -203,7 +200,7 @@ for i = 1, 19 do
 	tup.rule(lzh, cmd, mid_fn_original)
 
 	local mid_fn_ne_g = sh01:fn(string.format("%s/%02u.mid", variant_mid_ne, i))
-	local mid_fn_e_g = sh01:fn(string.format("%s/%%b", variant_mid_e))
+	local mid_fn_e_g = sh01:fn(string.format("%s/%%b", variant_mid))
 	arranged_mids_in_ne_pack += sh01:midi_patch(
 		mid_fn_original,
 		mid_fn_ne_g,
@@ -229,9 +226,9 @@ local inputs = sh01:readme(variant_mid_ne, sections_midi_ne)
 inputs += arranged_mids_in_ne_pack
 sh01:pack(variant_mid_ne, inputs)
 
-inputs = sh01:readme(variant_mid_e, sections_midi_e)
+inputs = sh01:readme(variant_mid, sections_midi_e)
 inputs += arranged_mids_in_e_pack
-sh01:pack(variant_mid_e, inputs)
+sh01:pack(variant_mid, inputs)
 
 --- Link missing echo files from the no-echo recordings
 ---@param st string

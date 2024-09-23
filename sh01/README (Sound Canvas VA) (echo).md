@@ -1,1 +1,0 @@
-This *echo* pack was rendered with fixed MIDI files whose Reverb Macro values were clamped to the SC-88Pro's specified range, retaining the panning delay reverb that ZUN would have heard on the synth he composed this soundtrack on.
