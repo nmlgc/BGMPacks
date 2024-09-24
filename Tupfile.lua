@@ -111,13 +111,12 @@ function Game:pack(variant, order_inputs)
 	tup.rule(inputs, cmd, zip_fn)
 end
 
+---Generates the lossy variant from the FLAC variant.
 ---@param variant string
 ---@param readme_sections string[]
----@param extra_files_to_link string[]
----@param flac_order_inputs string[]
-function Game:lossy_and_pack(
-	variant, readme_sections, extra_files_to_link, flac_order_inputs
-)
+---@param extra_files_to_link string[] Extra files linked into both FLAC and lossy variants
+---@return string[] flac_order_inputs, string[] lossy_order_inputs
+function Game:lossy(variant, readme_sections, extra_files_to_link)
 	local variant_flac = VariantFLAC(variant)
 	local variant_lossy = VariantLossy(variant)
 	local f_flac = self:variant_fn(variant_flac, "*.flac")
@@ -134,11 +133,7 @@ function Game:lossy_and_pack(
 		f_flac += input
 		f_lossy += self:link(input, variant_lossy)
 	end
-
-	f_flac += flac_order_inputs
-	f_lossy += flac_order_inputs
-	self:pack(variant_flac, f_flac)
-	self:pack(variant_lossy, f_lossy)
+	return f_flac, f_lossy
 end
 
 ---@param id string
@@ -254,6 +249,8 @@ for rec_i, rec in pairs(SH01_REC) do
 	local variant_ast = string.format("%s %s", SH01_ST[2], rec)
 	local variant_ost_flac = VariantFLAC(variant_ost)
 	local variant_ast_flac = VariantFLAC(variant_ast)
+	local variant_ost_lossy = VariantLossy(variant_ost)
+	local variant_ast_lossy = VariantLossy(variant_ast)
 	local section_ost = sh01:readme_section_fn(SH01_ST[1])
 	local section_ast = sh01:readme_section_fn(SH01_ST[2])
 
@@ -273,7 +270,9 @@ for rec_i, rec in pairs(SH01_REC) do
 	-- Original soundtrack
 	local sections = { section_ost }
 	sections += sections_rec
-	sh01:lossy_and_pack(variant_ost, sections, {}, {})
+	local f_flac, f_lossy = sh01:lossy(variant_ost, sections, {})
+	sh01:pack(variant_ost_flac, f_flac)
+	sh01:pack(variant_ost_lossy, f_lossy)
 
 	-- Arranged soundtrack
 	local flac_extras = {}
@@ -297,6 +296,10 @@ for rec_i, rec in pairs(SH01_REC) do
 		table.insert(sections, 6, sh01:readme_section_fn(fn))
 	end
 	sections += sh01:sections_midi(false)
-	sh01:lossy_and_pack(variant_ast, sections, flac_extras, order_inputs)
+	f_flac, f_lossy = sh01:lossy(variant_ast, sections, flac_extras)
+	f_flac += order_inputs
+	f_lossy += order_inputs
+	sh01:pack(variant_ast_flac, f_flac)
+	sh01:pack(variant_ast_lossy, f_lossy)
 end
 -- ---------------------------
