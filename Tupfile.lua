@@ -1,4 +1,5 @@
 OGGENC_Q = 5
+Z_ARCHIVE = '7z a -xr!.gitignore "%o"'
 
 ---@param pack string
 ---@return string
@@ -99,9 +100,7 @@ end
 ---@param variant string
 ---@param order_inputs string[]
 function Game:pack(variant, order_inputs)
-	local cmd = string.format(
-		'7z a -xr!.gitignore "%%o" "./%s/%s"', self.id, variant
-	)
+	local cmd = string.format('%s "./%s/%s"', Z_ARCHIVE, self.id, variant)
 	for _, fn in pairs(self.placefiles) do
 		cmd = (cmd .. string.format(' "./%s"', fn))
 	end
@@ -244,6 +243,8 @@ end
 link_missing(SH01_ST[1])
 link_missing(SH01_ST[2])
 
+local ne_flac = {}
+local ne_lossy = {}
 for rec_i, rec in pairs(SH01_REC) do
 	local variant_ost = string.format("%s %s", SH01_ST[1], rec)
 	local variant_ast = string.format("%s %s", SH01_ST[2], rec)
@@ -271,8 +272,13 @@ for rec_i, rec in pairs(SH01_REC) do
 	local sections = { section_ost }
 	sections += sections_rec
 	local f_flac, f_lossy = sh01:lossy(variant_ost, sections, {})
-	sh01:pack(variant_ost_flac, f_flac)
-	sh01:pack(variant_ost_lossy, f_lossy)
+	if rec_i ~= 3 then
+		sh01:pack(variant_ost_flac, f_flac)
+		sh01:pack(variant_ost_lossy, f_lossy)
+	else
+		ne_flac += f_flac
+		ne_lossy += f_lossy
+	end
 
 	-- Arranged soundtrack
 	local flac_extras = {}
@@ -299,7 +305,25 @@ for rec_i, rec in pairs(SH01_REC) do
 	f_flac, f_lossy = sh01:lossy(variant_ast, sections, flac_extras)
 	f_flac += order_inputs
 	f_lossy += order_inputs
-	sh01:pack(variant_ast_flac, f_flac)
-	sh01:pack(variant_ast_lossy, f_lossy)
+	if rec_i ~= 3 then
+		sh01:pack(variant_ast_flac, f_flac)
+		sh01:pack(variant_ast_lossy, f_lossy)
+	else
+		ne_flac += f_flac
+		ne_lossy += f_lossy
+	end
+end
+
+-- Pack the no-echo reference archives
+local variants = { { VariantFLAC, ne_flac }, { VariantLossy, ne_lossy } }
+for _, v in pairs(variants) do
+	local variant_func, inputs = table.unpack(v)
+	local cmd = Z_ARCHIVE
+	for _, st in pairs(SH01_ST) do
+		local variant = variant_func(st .. " " .. SH01_REC[3])
+		cmd = string.format('%s "./%s/%s"', cmd, sh01.id, variant)
+	end
+	local arc_name = variant_func("No-echo reference")
+	tup.rule(inputs, cmd, string.format("release/%s %s.zip", sh01.id, arc_name))
 end
 -- ---------------------------
