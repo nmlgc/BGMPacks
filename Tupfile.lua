@@ -61,6 +61,19 @@ function Game:link(src, dst_variant)
 	return tup.rule(src, cmd, dst)
 end
 
+---Runs a sed patch on a MIDI file.
+---@param src string
+---@param dst string
+---@param patch_fns string[]
+function Game:midi_patch(src, dst, patch_fns)
+	local cmd = "midicomp -i \"%f\" | "
+	for _, patch_fn in pairs(patch_fns) do
+		cmd = (cmd .. string.format("sed -rf '%s' | ", patch_fn))
+	end
+	cmd = (cmd .. "midicomp -ic \"%o\"")
+	return tup.rule(src, cmd, dst)
+end
+
 ---Generates a README file for the given variant.
 ---@param variant string
 ---@param sections string[]
@@ -174,6 +187,7 @@ local variant_mid_ne = string.format("%s (no echo)", variant_mid)
 local variant_mid_e = string.format("%s (echo)", variant_mid)
 local build_path = sh01:build_fn("")
 local arranged_mids_in_ne_pack = {}
+local arranged_mids_in_e_pack = {}
 for i = 1, 19 do
 	local lzh_basename = string.format("ssg_%02u.lzh", i)
 	local cmd = string.format(
@@ -185,10 +199,16 @@ for i = 1, 19 do
 	local mid_fn_original = (build_path .. mid_fn_in_lzh)
 	cmd = string.format('7z e -o"%s" %%f %s', build_path, mid_fn_in_lzh)
 	tup.rule(lzh, cmd, mid_fn_original)
-	arranged_mids_in_ne_pack += tup.rule(
+
+	local mid_fn_ne_g = sh01:fn(string.format("%s/%02u.mid", variant_mid_ne, i))
+	local mid_fn_e_g = sh01:fn(string.format("%s/%%b", variant_mid_e))
+	arranged_mids_in_ne_pack += sh01:midi_patch(
 		mid_fn_original,
-		"midicomp -i %f | sed -rf 'sh01/MIDI fixes.sed' | midicomp -ic \"%o\"",
-		sh01:fn(string.format("%s/%02u.mid", variant_mid_ne, i))
+		mid_fn_ne_g,
+		{ "sh01/MIDI general fixes.sed", "sh01/MIDI in-game fixes.sed" }
+	)
+	arranged_mids_in_e_pack += sh01:midi_patch(
+		mid_fn_ne_g, mid_fn_e_g, { "sh01/MIDI echo.sed" }
 	)
 end
 local sections_midi_ne = { sh01:readme_section_fn(variant_mid) }
@@ -199,11 +219,6 @@ local inputs = sh01:readme(variant_mid_ne, sections_midi_ne)
 inputs += arranged_mids_in_ne_pack
 sh01:pack(variant_mid_ne, inputs)
 
-local arranged_mids_in_e_pack = tup.foreach_rule(
-	arranged_mids_in_ne_pack,
-	"midicomp -i \"%f\" | sed -rf 'sh01/MIDI echo.sed' | midicomp -ic \"%o\"",
-	sh01:fn(string.format("%s/%%b", variant_mid_e))
-)
 inputs = sh01:readme(variant_mid_e, sections_midi_e)
 inputs += arranged_mids_in_e_pack
 sh01:pack(variant_mid_e, inputs)

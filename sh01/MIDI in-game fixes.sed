@@ -1,11 +1,6 @@
 # Limit Sequence Names to the quoted name of the piece
 s/(Meta SeqName \")\\x81y (.+) \\x81z.+(\")/\1\2\3/
 
-# Insert missing Roland vendor prefix bytes (0x41)
-# (The existing checksums in the files are correct, and already assume this
-# byte to be present.)
-s/SysEx f0 10/SysEx f0 41 10/g
-
 # Move the first notes of ZUN's last released three arrangements to beat 2,
 # matching the OST version
 # -------------------------------------------------------------------------
