@@ -1,10 +1,5 @@
 
-### Rendering process
-
-All edited MIDI files were rendered using Sound Canvas VA version 1.1.6, which was the latest version available in the [Roland Cloud](https://www.rolandcloud.com/) in mid-December 2023.\
-The conversion was done in foobar2000 v2.0 x64, with v2.9.1.3 of the [foo_midi component](https://github.com/stuerp/foo_midi).
-
-#### Initial setup
+#### Conversion
 
 1. Restrict foobar2000 to a single conversion thread by setting *File → Preferences* (Ctrl+P) *→ Advanced → Tools → Converter → Thread count* to 1.\
    As it's typical for the VST industry, Sound Canvas VA is excessively DRM'd and allows only a single process to run at any given time. This causes foobar2000's regular parallel bulk conversion to throw a *Parameter File1 Read Error* for every Sound Canvas VA process spawned beyond the first.

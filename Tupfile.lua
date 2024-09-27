@@ -238,6 +238,7 @@ for rec_i, rec in pairs(SH01_REC) do
 			sh01:readme_section_fn("Sound Canvas VA echo header")
 		}
 		sections_rec += { sh01:readme_section_fn(rec) }
+		sections_rec += { sh01:readme_section_fn("Sound Canvas VA version") }
 		sections_rec += { "README Sound Canvas VA process.md" }
 	else
 		sections_rec += { sh01:readme_section_fn(rec) }
