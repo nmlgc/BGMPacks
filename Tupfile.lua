@@ -210,6 +210,14 @@ for i = 1, 19 do
 	arranged_mids_in_e_pack += sh01:midi_patch(
 		mid_fn_ne_g, mid_fn_e_g, { "sh01/MIDI echo.sed" }
 	)
+	local mid_fn_ne_rec = sh01:midi_patch(
+		mid_fn_original,
+		sh01:build_fn("ast_rec/ne/%b"),
+		{ "sh01/MIDI general fixes.sed", "sh01/MIDI recording fixes.sed" }
+	)
+	sh01:midi_patch(
+		mid_fn_ne_rec, sh01:build_fn("ast_rec/e/%b"), { "sh01/MIDI echo.sed" }
+	)
 end
 local sections_midi_ne = { sh01:readme_section_fn(variant_mid) }
 local sections_midi_e = { table.unpack(sections_midi_ne) }
@@ -263,6 +271,9 @@ for rec_i, rec in pairs(SH01_REC) do
 	sections += sections_rec
 	if rec_i == 1 then
 		sections += { sh01:readme_section_fn(variant_ast) }
+	else
+		local fn = string.format("%s (Sound Canvas VA)", SH01_ST[2])
+		table.insert(sections, 6, sh01:readme_section_fn(fn))
 	end
 	sections += sh01:sections_midi(false)
 	sh01:lossy_and_pack(variant_ast, sections, flac_extras, order_inputs)
